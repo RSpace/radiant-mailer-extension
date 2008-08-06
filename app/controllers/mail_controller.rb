@@ -11,6 +11,7 @@ class MailController < ApplicationController
 
     mail = Mail.new(part_page, config, params[:mailer])
     page.last_mail = part_page.last_mail = mail
+    process_mail(mail, config)
 
     if mail.send
       redirect_to (config[:redirect_to] || "#{page.url}#mail_sent")
@@ -20,6 +21,10 @@ class MailController < ApplicationController
   end
   
   private
+  
+  # Hook here to do additional things, like check a CAPTCHA
+  def process_mail(mail, config)
+  end
 
   def config_and_page(page)
     until page.part(:mailer) or (not page.parent)
