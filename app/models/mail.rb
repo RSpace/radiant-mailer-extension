@@ -6,10 +6,16 @@ class Mail
     @errors = {}
   end
   
+  def self.valid_config?(config)
+    return false if config['recipients'].blank? and config['recipients_field'].blank?
+    return false if config['from'].blank? and config['from_field'].blank?
+    true
+  end
+  
   def valid?
     unless defined?(@valid)
       @valid = true
-      if config[:recipients].blank?
+      if recipients.blank?
         errors['form'] = 'Recipients are required.'
         @valid = false
       end
@@ -35,11 +41,22 @@ class Mail
     config[:from] || data[config[:from_field]]
   end
   
+  def recipients
+    config[:recipients] || data[config[:recipients_field]]
+  end
+  
+  def reply_to
+    config[:reply_to] || data[config[:reply_to_field]]
+  end
+  
+  def sender
+    config[:sender]
+  end
+  
   def send
     return false if not valid?
 
-    recipients = config[:recipients]
-    reply_to = data[config[:reply_to_field]] || config[:reply_to] || from
+    reply_to = reply_to || from
 
     plain_body = (page.part( :email ) ? page.render_part( :email ) : page.render_part( :email_plain ))
     html_body = page.render_part( :email_html ) || nil
@@ -50,6 +67,12 @@ The following information was posted:
 #{data.to_hash.to_yaml}
       EMAIL
     end
+    
+    headers = { 'Reply-To' => reply_to }
+    if sender
+      headers['Return-Path'] = sender
+      headers['Sender'] = sender
+    end
 
     Mailer.deliver_generic_mail(
       :recipients => recipients,
@@ -58,7 +81,7 @@ The following information was posted:
       :plain_body => plain_body,
       :html_body => html_body,
       :cc => data[config[:cc_field]] || config[:cc] || "",
-      :headers => { 'Reply-To' => reply_to }
+      :headers => headers
     )
   end
 end

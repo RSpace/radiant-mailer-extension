@@ -12,8 +12,8 @@ module MailerTags
 
   desc %{ All mailer-related tags live inside this one. }
   tag "mailer" do |tag|
-    if config['recipients'].blank? or (config['from'].blank? and config['from_field'].blank?)
-      "Mailers require at least one recipient and a from address to be configured."
+    if !Mail.valid_config?(config)
+      "Mailer config is not valid (see Mailer.valid_config?)"
     else
       tag.expand
     end
