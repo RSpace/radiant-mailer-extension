@@ -26,9 +26,9 @@ class Mail
       end
     
       if @required
-        @required.each do |name,_|
+        @required.each do |name,msg|
           if data[name].blank?
-            errors[name] = "is required."
+            errors[name] = ((msg.blank? || msg == "1" || msg == "true") ? "is required." : msg)
             @valid = false
           end
         end

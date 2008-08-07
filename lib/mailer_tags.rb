@@ -164,7 +164,7 @@ module MailerTags
   end
   
   def add_required(result, tag)
-    result << %(<input type="hidden" name="mailer[required][#{tag.attr['name']}]" value="1" />) if tag.attr['required']
+    result << %(<input type="hidden" name="mailer[required][#{tag.attr['name']}]" value="#{tag.attr['required']}" />) if tag.attr['required']
     result
   end
 
